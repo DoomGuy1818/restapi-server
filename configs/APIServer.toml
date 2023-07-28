@@ -1,0 +1,5 @@
+bind_Addr = ":8000"
+log_level = "debug"
+
+[store]
+Database_url = "root:musled_03@tcp(localhost:3306)/rest_api_dev?multiStatements=true" 
