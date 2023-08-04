@@ -7,17 +7,34 @@ type UserRepository struct {
 }
 
 func (s *UserRepository) Create(u *model.User) (*model.User, error) {
-	if err := s.store.db.QueryRow("INSERT INTO users(email, encrypted_password) VALUES ($1, $2) RETURNING id",
+	_, err := s.store.db.Exec("INSERT INTO users(email, encrypted_password) VALUES (?, ?)",
 	u.Email,
 	u.EncryptedPassword,
-	).Scan(&u.ID); err != nil {
+	) 
+	if err != nil {
 		return nil, err
 	}
+	if err := s.store.db.QueryRow("SELECT LAST_INSERT_ID(?)", u.ID).Scan(&u.ID);
+	err != nil{
+		return nil, err
+	}
+	
 
-
-	return nil, nil
+	return u, nil
 }
 
-func (s *Store) FindByEmail(email string) (*model.User, error){
-	return nil, nil
+func (s *UserRepository) FindByEmail(email string) (*model.User, error){
+	u := &model.User{
+	}
+	if err := s.store.db.QueryRow(
+		"SELECT id, email, encrypted_password FROM users WHERE email = ?", 
+		u.Email,
+	).Scan(
+		&u.ID, 
+		&u.Email, 
+		&u.EncryptedPassword,
+		); err !=nil{
+			return nil, err
+		}
+	return u, nil
 }
